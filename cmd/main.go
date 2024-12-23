@@ -30,6 +30,7 @@ func main() {
 
 	defaultConfig, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithSharedConfigProfile("default"))
+
 	if err != nil {
 		return
 	}
