@@ -1,5 +1,12 @@
 package main
 
+import (
+	"context"
+	"fmt"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+)
+
 /**
 *
 * main
@@ -21,4 +28,15 @@ package main
 
 func main() {
 
+	defaultConfig, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithSharedConfigProfile("default"))
+
+	if err != nil {
+		return
+	}
+
+	defaultConfig.Region = "us-east-1"
+
+	client := s3.NewFromConfig(defaultConfig)
+	fmt.Println(client)
 }
