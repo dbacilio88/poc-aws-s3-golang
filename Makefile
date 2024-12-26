@@ -14,5 +14,8 @@ apply:
 destroy:
 	terraform -chdir=workspace/terraform destroy
 
+update:
+	go get -d -v -u all
+
 .PHONY:
 

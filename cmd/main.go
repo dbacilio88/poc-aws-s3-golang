@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	ss3 "github.com/aws/aws-sdk-go/service/s3"
+	"log"
 )
 
 /**
@@ -26,17 +29,104 @@ import (
 *
  */
 
-func main() {
+const REGION = "us-west-2"
 
-	defaultConfig, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithSharedConfigProfile("default"))
+func LoadSessionDefault() *s3.Client {
+	cfg, err := config.LoadDefaultConfig(
+		context.Background(),
+		//config.WithRegion(REGION),
+		//config.WithSharedConfigProfile("default"),
+	)
+
+	log.Println(cfg)
 
 	if err != nil {
+		errorPrint(err)
+		return nil
+	}
+
+	client := s3.NewFromConfig(cfg)
+
+	return client
+}
+
+func ListBucketsDefault(client *s3.Client) {
+	buckets, err := client.ListBuckets(context.Background(), &s3.ListBucketsInput{})
+	if err != nil {
+		errorPrint(err)
+		return
+	}
+	for _, bucket := range buckets.Buckets {
+		log.Println(*bucket.Name)
+	}
+
+}
+
+func errorPrint(err error) {
+	log.Fatal("Error:", err)
+}
+
+func main() {
+
+	//manejo de sesiones default:
+	sessionDefault := LoadSessionDefault()
+
+	// listar buckets con la config default:
+	ListBucketsDefault(sessionDefault)
+
+	cfg := &aws.Config{
+		Region: aws.String("us-east-1"),
+		//Credentials: credentials.NewSharedCredentials("workspace/.aws/credentials", "default"),
+	}
+	//session
+	ns, err := session.NewSession(cfg)
+	if err != nil {
+		errorPrint(err)
 		return
 	}
 
-	defaultConfig.Region = "us-east-1"
+	s3Clint := ss3.New(ns)
+	buckets, err := s3Clint.ListBuckets(nil)
+	if err != nil {
+		return
+	}
+	for _, bucket := range buckets.Buckets {
+		log.Println(*bucket.Name)
+	}
+	//m
 
-	client := s3.NewFromConfig(defaultConfig)
-	fmt.Println(client)
+	/*
+
+
+
+		newSession, err := session.NewSession(cfg)
+
+		if err != nil {
+			return
+		}
+
+		bucketName := "s3-golang-bucket-test"
+
+		svc := s3.New(newSession)
+
+		buckets, err := svc.ListBuckets(nil)
+		if err != nil {
+			return
+		}
+
+		for _, bucket := range buckets.Buckets {
+			fmt.Println(*bucket.Name)
+		}
+
+		objects, err := svc.ListObjects(&s3.ListObjectsInput{
+			Bucket: aws.String(bucketName),
+		})
+		if err != nil {
+			return
+		}
+		for _, o := range objects.Contents {
+			fmt.Println(*o.Key)
+		}
+
+	*/
 }
