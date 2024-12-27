@@ -1,4 +1,4 @@
-package env
+package config
 
 import (
 	"errors"
@@ -32,26 +32,26 @@ var YAML Properties
 type Properties struct {
 	Server    Server    `mapstructure:"server" yaml:"server"`
 	Scheduler Scheduler `mapstructure:"scheduler" yaml:"scheduler"`
-	Rabbitmq  Rabbitmq  `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Rabbitmq  Rabbitmq  `mapstructure:"rabbitmq" yaml:"rabbitmq" validate:"required"`
 }
 
 // Server use mapstructure in document github.com/go-viper/mapstructure/v2
 type Server struct {
-	Host        string `mapstructure:"host" yaml:"host"`
-	Port        int    `mapstructure:"port" yaml:"port"`
-	Name        string `mapstructure:"name" yaml:"name"`
-	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
-	Logging     string `mapstructure:"logging" yaml:"logging"`
-	Environment string `mapstructure:"environment" yaml:"environment"`
-	Logs        string `mapstructure:"logs" yaml:"logs"`
+	Host        string `mapstructure:"host" yaml:"host" validate:"required"`
+	Port        int    `mapstructure:"port" yaml:"port" validate:"required"`
+	Name        string `mapstructure:"name" yaml:"name" validate:"required"`
+	Timeout     int    `mapstructure:"timeout" yaml:"timeout" validate:"required"`
+	Logging     string `mapstructure:"logging" yaml:"logging" validate:"required"`
+	Environment string `mapstructure:"environment" yaml:"environment" validate:"required"`
+	Logs        string `mapstructure:"logs" yaml:"logs" validate:"required"`
 }
 
 type Scheduler struct {
-	Enable bool `mapstructure:"enable" yaml:"enable"`
+	Enable bool `mapstructure:"enable" yaml:"enable" validate:"required"`
 }
 
 type Rabbitmq struct {
-	Exchange   Exchange   `mapstructure:"exchange" yaml:"exchange"`
+	Exchange   Exchange   `mapstructure:"exchange" yaml:"exchange" validate:"required"`
 	Host       string     `mapstructure:"host" yaml:"host"`
 	Password   string     `mapstructure:"password" yaml:"password"`
 	Port       int        `mapstructure:"port" yaml:"port"`
@@ -103,27 +103,23 @@ func (r *Rabbitmq) GetUri() string {
 		YAML.Rabbitmq.Host,
 		YAML.Rabbitmq.Port)
 }
-func (r *Rabbitmq) GetVhost() string {
-	return r.Vhost
-}
+func (r *Rabbitmq) GetVhost() string { return r.Vhost }
 func (r *Rabbitmq) GetQueueName() string {
 	return r.Queue.Name
 }
 func (r *Rabbitmq) GetExchange() string {
 	return r.Exchange.Name
 }
-
 func (r *Rabbitmq) GetRoutingKey() string {
 	return r.RoutingKey.Request
 }
 
-func LoadProperties() {
+func LoadProperties() error {
 
 	path := os.Getenv("CONFIG_PATH")
 
 	if path == "" {
-		fmt.Println("err")
-		log.Fatal("La variable de entorno CONFIG_PATH no está definida")
+		return errors.New("la variable de entorno CONFIG_PATH no está definida")
 	}
 
 	viper.SetConfigName("application")
@@ -136,27 +132,22 @@ func LoadProperties() {
 	if err := viper.ReadInConfig(); err != nil {
 		var file viper.ConfigFileNotFoundError
 		if errors.As(err, &file) {
-			fmt.Println("Config file not found")
 			log.Fatalf("Error reading config file, %s", file)
-			return
+			return err
 		}
-		return
+		return err
 	}
 
-	err := viper.WriteConfig()
-
-	if err != nil {
-		fmt.Println("error writing config file")
+	if err := viper.WriteConfig(); err != nil {
 		log.Fatalf("Error writing config file, %s", err)
-		return
+		return err
 	}
 
-	err = viper.Unmarshal(&YAML)
-
-	if err != nil {
-		log.Fatalf("Error unmarshalling config, %s", err)
-		return
+	if err := viper.Unmarshal(&YAML); err != nil {
+		log.Fatalf("Error unmarshalling config file, %s", err)
+		return err
 	}
 
 	log.Println("Successfully loaded config")
+	return nil
 }

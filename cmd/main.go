@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	ss3 "github.com/aws/aws-sdk-go/service/s3"
+	config2 "github.com/dbacilio88/poc-aws-s3-golang/config"
+	"github.com/dbacilio88/poc-aws-s3-golang/pkg/logs"
+	"go.uber.org/zap"
 	"log"
 )
 
@@ -68,31 +69,30 @@ func errorPrint(err error) {
 
 func main() {
 
+	//configuration properties:
+	if err := config2.LoadProperties(); err != nil {
+		errorPrint(err)
+	}
+
+	//configuration logs:
+	l, err := logs.LoggerConfiguration(config2.YAML.Server.Environment)
+
+	std := zap.RedirectStdLog(l)
+
+	defer std()
+
+	if err != nil {
+		return
+	}
+
+	fmt.Println(l)
+
 	//manejo de sesiones default:
 	sessionDefault := LoadSessionDefault()
 
 	// listar buckets con la config default:
 	ListBucketsDefault(sessionDefault)
 
-	cfg := &aws.Config{
-		Region: aws.String("us-east-1"),
-		//Credentials: credentials.NewSharedCredentials("workspace/.aws/credentials", "default"),
-	}
-	//session
-	ns, err := session.NewSession(cfg)
-	if err != nil {
-		errorPrint(err)
-		return
-	}
-
-	s3Clint := ss3.New(ns)
-	buckets, err := s3Clint.ListBuckets(nil)
-	if err != nil {
-		return
-	}
-	for _, bucket := range buckets.Buckets {
-		log.Println(*bucket.Name)
-	}
 	//m
 
 	/*
