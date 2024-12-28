@@ -8,6 +8,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
