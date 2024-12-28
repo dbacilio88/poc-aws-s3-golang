@@ -26,7 +26,7 @@ import (
 *
  */
 
-const rootProject = "./"
+//const rootProject = "./"
 
 type Helper struct {
 	RootDir          string
@@ -34,13 +34,13 @@ type Helper struct {
 	AwsConfiguration string
 }
 
-func NewHelper() *Helper {
+func NewHelper(rootProject string) *Helper {
 	root, _ := filepath.Abs(path.Join(rootProject))
 	return &Helper{RootDir: root}
 }
 
 func (h *Helper) CredentialsAws() *Helper {
-	credentials, _ := filepath.Abs(filepath.Join(h.RootDir, "deployments", "cloud", ".aws"))
+	credentials, _ := filepath.Abs(filepath.Join(h.RootDir, "deploy", "cloud", ".aws"))
 	fmt.Println("credentials: ", credentials)
 	h.AwsCredentials = strings.Join([]string{credentials, "credentials"}, "/")
 	h.AwsConfiguration = strings.Join([]string{credentials, "config"}, "/")

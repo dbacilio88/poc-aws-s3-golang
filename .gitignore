@@ -299,4 +299,5 @@ terraform.rc
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform
 
-/deployments/cloud/*
+/deploy/cloud/*
+/deploy/cloud/.aws/

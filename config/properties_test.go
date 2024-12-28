@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
+	"github.com/dbacilio88/poc-aws-s3-golang/pkg/utils"
 	"os"
-	"path"
 	"path/filepath"
 	"testing"
 )
@@ -218,12 +218,11 @@ func TestRabbitmq_GetUri(t *testing.T) {
 	}
 }
 
-const rootProject = "../../"
-
 var rootPath = ""
 
 func setup() {
-	rootPath, _ = filepath.Abs(path.Join(rootProject))
+	uh := utils.NewHelper("../")
+	rootPath = uh.RootDir
 }
 func teardown() {
 	// Limpia las variables de entorno después de las pruebas
@@ -232,9 +231,9 @@ func teardown() {
 func TestLoadProperties(t *testing.T) {
 	setup()
 	defer teardown()
-	rootFilePath, _ := filepath.Abs(filepath.Join(rootPath, "test/resources", "valid"))
-	rootInvalidFilePath, _ := filepath.Abs(filepath.Join(rootPath, "test/resources", "invalid"))
-
+	rootFilePath, _ := filepath.Abs(filepath.Join(rootPath, "test", "config", "valid"))
+	fmt.Println("rootFilePath:", rootFilePath)
+	rootInvalidFilePath, _ := filepath.Abs(filepath.Join(rootPath, "test", "config", "invalid"))
 	type args struct {
 		path string
 	}

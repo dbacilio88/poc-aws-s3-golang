@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/dbacilio88/poc-aws-s3-golang/internal/utils"
+	"github.com/dbacilio88/poc-aws-s3-golang/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -31,7 +31,6 @@ import (
 type S3Adapter struct {
 	*zap.Logger
 	client *s3.Client
-	helper *utils.Helper
 }
 
 type IS3Adapter interface {
@@ -40,7 +39,7 @@ type IS3Adapter interface {
 
 func NewS3Adapter(log *zap.Logger, region, profile string) IS3Adapter {
 	log.Info("Initializing S3 Adapter with: ", zap.String("region", region), zap.String("profile", profile))
-	uh := utils.NewHelper()
+	uh := utils.NewHelper(".")
 	credentials := uh.CredentialsAws()
 
 	cfg, err := config.LoadDefaultConfig(
@@ -60,9 +59,7 @@ func NewS3Adapter(log *zap.Logger, region, profile string) IS3Adapter {
 
 	return &S3Adapter{
 		Logger: log,
-
 		client: s3.NewFromConfig(cfg),
-		helper: utils.NewHelper(),
 	}
 }
 
