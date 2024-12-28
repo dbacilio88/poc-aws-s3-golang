@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
@@ -40,9 +39,8 @@ func NewHelper(rootProject string) *Helper {
 }
 
 func (h *Helper) CredentialsAws() *Helper {
-	credentials, _ := filepath.Abs(filepath.Join(h.RootDir, "deploy", "cloud", ".aws"))
-	fmt.Println("credentials: ", credentials)
-	h.AwsCredentials = strings.Join([]string{credentials, "credentials"}, "/")
-	h.AwsConfiguration = strings.Join([]string{credentials, "config"}, "/")
+	awsPath, _ := filepath.Abs(filepath.Join(h.RootDir, "deploy", "cloud", ".aws"))
+	h.AwsCredentials = strings.Join([]string{awsPath, "credentials"}, "/")
+	h.AwsConfiguration = strings.Join([]string{awsPath, "config"}, "/")
 	return h
 }

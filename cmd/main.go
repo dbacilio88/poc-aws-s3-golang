@@ -28,7 +28,8 @@ import (
 *
  */
 
-const REGION = "us-west-2"
+const REGION = "us-east-1"
+const PROFILE = "default"
 
 func errorPrint(err error) {
 	log.Fatal("Error:", err)
@@ -49,12 +50,12 @@ func main() {
 	defer std()
 
 	if err != nil {
-		l.Error("Error initializing logger")
+		errorPrint(err)
 		return
 	}
 
-	s3Instance := adapters.NewS3Adapter(l, REGION, "default")
+	s3Instance := adapters.NewS3Adapter(l, REGION, PROFILE)
 	storageInstance := services.NewStorageService(l, s3Instance)
-	storageInstance.ListBucketToS3()
+	storageInstance.ListBucketFromS3()
 
 }
