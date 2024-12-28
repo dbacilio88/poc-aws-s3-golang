@@ -19,7 +19,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
@@ -298,4 +298,6 @@ override.tf.json
 terraform.rc
 
 # End of https://www.toptal.com/developers/gitignore/api/terraform
-/workspace/.aws/
+
+/deploy/cloud/*
+/deploy/cloud/.aws/

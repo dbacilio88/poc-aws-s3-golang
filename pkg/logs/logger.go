@@ -2,7 +2,7 @@ package logs
 
 import (
 	"fmt"
-	"github.com/dbacilio88/poc-aws-s3-golang/pkg/env"
+	"github.com/dbacilio88/poc-aws-s3-golang/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -11,9 +11,9 @@ import (
 
 /**
 *
-* logger
+* logs
 * <p>
-* logger file
+* logs file
 *
 * Copyright (c) 2024 All rights reserved.
 *
@@ -54,7 +54,7 @@ func LoggerConfiguration(level string) (*zap.Logger, error) {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
-		NameKey:        "logger",
+		NameKey:        "logs",
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
@@ -66,7 +66,7 @@ func LoggerConfiguration(level string) (*zap.Logger, error) {
 
 	encoder := zapcore.NewConsoleEncoder(encoderConfig)
 
-	filename := fmt.Sprintf("/%s/%s-%s.log", env.YAML.Server.Logs, env.YAML.Server.Name, env.YAML.Server.Environment)
+	filename := fmt.Sprintf("/%s/%s-%s.log", config.YAML.Server.Logs, config.YAML.Server.Name, config.YAML.Server.Environment)
 
 	logLumberjack := &lumberjack.Logger{
 		Filename:   filename,
@@ -83,15 +83,15 @@ func LoggerConfiguration(level string) (*zap.Logger, error) {
 	Core = zapcore.NewTee(
 		fileCore.With(
 			[]zap.Field{
-				zap.String("app", env.YAML.Server.Name),
-				zap.String("env", env.YAML.Server.Environment),
+				zap.String("app", config.YAML.Server.Name),
+				zap.String("env", config.YAML.Server.Environment),
 			},
 		),
 
 		consoleCore.With(
 			[]zap.Field{
-				zap.String("app", env.YAML.Server.Name),
-				zap.String("env", env.YAML.Server.Environment),
+				zap.String("app", config.YAML.Server.Name),
+				zap.String("env", config.YAML.Server.Environment),
 			}),
 	)
 	instance = zap.New(Core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))

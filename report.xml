@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+	<testsuite tests="19" failures="0" time="0.012" name="github.com/dbacilio88/poc-aws-s3-golang/pkg/env">
+		<properties>
+			<property name="go.version" value="go1.23.4"></property>
+		</properties>
+		<testcase classname="env" name="TestRabbitmq_GetExchange" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetExchange/TestRabbitmq_GetExchange" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetExchange/EmptyExchange" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetRoutingKey" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetRoutingKey/TestGetRoutingKey" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetRoutingKey/EmptyRoutingKey" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetQueueName" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetQueueName/TestGetQueueName" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetQueueName/EmptyQueueName" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetVhost" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetVhost/TestGetVhost" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetVhost/EmptyVhost" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetUri" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetUri/TestGetUri" time="0.000"></testcase>
+		<testcase classname="env" name="TestRabbitmq_GetUri/EmptyUri" time="0.000"></testcase>
+		<testcase classname="env" name="TestLoadProperties" time="0.010"></testcase>
+		<testcase classname="env" name="TestLoadProperties/TestValidPathLoadProperties" time="0.010"></testcase>
+		<testcase classname="env" name="TestLoadProperties/TestInvalidPathLoadProperties" time="0.000"></testcase>
+		<testcase classname="env" name="TestLoadProperties/TestEmptyPathLoadProperties" time="0.000"></testcase>
+	</testsuite>
+</testsuites>

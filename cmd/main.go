@@ -1,12 +1,11 @@
 package main
 
 import (
-	"context"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	ss3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/dbacilio88/poc-aws-s3-golang/config"
+	"github.com/dbacilio88/poc-aws-s3-golang/internal/adapters"
+	"github.com/dbacilio88/poc-aws-s3-golang/internal/services"
+	"github.com/dbacilio88/poc-aws-s3-golang/pkg/logs"
+	"go.uber.org/zap"
 	"log"
 )
 
@@ -31,102 +30,31 @@ import (
 
 const REGION = "us-west-2"
 
-func LoadSessionDefault() *s3.Client {
-	cfg, err := config.LoadDefaultConfig(
-		context.Background(),
-		//config.WithRegion(REGION),
-		//config.WithSharedConfigProfile("default"),
-	)
-
-	log.Println(cfg)
-
-	if err != nil {
-		errorPrint(err)
-		return nil
-	}
-
-	client := s3.NewFromConfig(cfg)
-
-	return client
-}
-
-func ListBucketsDefault(client *s3.Client) {
-	buckets, err := client.ListBuckets(context.Background(), &s3.ListBucketsInput{})
-	if err != nil {
-		errorPrint(err)
-		return
-	}
-	for _, bucket := range buckets.Buckets {
-		log.Println(*bucket.Name)
-	}
-
-}
-
 func errorPrint(err error) {
 	log.Fatal("Error:", err)
 }
 
 func main() {
 
-	//manejo de sesiones default:
-	sessionDefault := LoadSessionDefault()
-
-	// listar buckets con la config default:
-	ListBucketsDefault(sessionDefault)
-
-	cfg := &aws.Config{
-		Region: aws.String("us-east-1"),
-		//Credentials: credentials.NewSharedCredentials("workspace/.aws/credentials", "default"),
-	}
-	//session
-	ns, err := session.NewSession(cfg)
-	if err != nil {
+	//configuration properties:
+	if err := config.LoadProperties(); err != nil {
 		errorPrint(err)
-		return
 	}
 
-	s3Clint := ss3.New(ns)
-	buckets, err := s3Clint.ListBuckets(nil)
+	//configuration logs:
+	l, err := logs.LoggerConfiguration(config.YAML.Server.Environment)
+
+	std := zap.RedirectStdLog(l)
+
+	defer std()
+
 	if err != nil {
+		l.Error("Error initializing logger")
 		return
 	}
-	for _, bucket := range buckets.Buckets {
-		log.Println(*bucket.Name)
-	}
-	//m
 
-	/*
+	s3Instance := adapters.NewS3Adapter(l, REGION, "default")
+	storageInstance := services.NewStorageService(l, s3Instance)
+	storageInstance.ListBucketToS3()
 
-
-
-		newSession, err := session.NewSession(cfg)
-
-		if err != nil {
-			return
-		}
-
-		bucketName := "s3-golang-bucket-test"
-
-		svc := s3.New(newSession)
-
-		buckets, err := svc.ListBuckets(nil)
-		if err != nil {
-			return
-		}
-
-		for _, bucket := range buckets.Buckets {
-			fmt.Println(*bucket.Name)
-		}
-
-		objects, err := svc.ListObjects(&s3.ListObjectsInput{
-			Bucket: aws.String(bucketName),
-		})
-		if err != nil {
-			return
-		}
-		for _, o := range objects.Contents {
-			fmt.Println(*o.Key)
-		}
-
-	*/
 }
