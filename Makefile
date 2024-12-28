@@ -5,16 +5,16 @@ report:
 	go test -v 2>&1 ./... | go-junit-report -set-exit-code > report.xml
 
 init:
-	terraform -chdir=deployments/terraform init
+	terraform -chdir=deploy/terraform init
 
 plan:
-	terraform -chdir=deployments/terraform plan
+	terraform -chdir=deploy/terraform plan
 
 apply:
-	terraform -chdir=deployments/terraform apply
+	terraform -chdir=deploy/terraform apply
 
 destroy:
-	terraform -chdir=deployments/terraform destroy
+	terraform -chdir=deploy/terraform destroy
 
 update:
 	go get -d -v -u all
