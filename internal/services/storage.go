@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/dbacilio88/poc-aws-s3-golang/internal/adapters"
 	"go.uber.org/zap"
 )
@@ -42,28 +43,36 @@ func NewStorageService(log *zap.Logger, s3adapter adapters.IS3Adapter) IStorageS
 
 func (s *StorageService) ListBucketFromS3() {
 
-	s.Info("Initializing S3 service")
+	s.Info("Initializing S3 service: ")
 	buckets, err := s.s3adapter.ListBuckets()
 
 	if err != nil {
-		s.Error("Failed to list buckets", zap.Error(err))
+		s.Error("Failed to list buckets: ", zap.String("error", err.Error()))
 		return
 	}
 
 	if len(buckets) == 0 {
-		s.Info("No buckets found or You don't have any buckets!")
+		s.Info("No buckets found or You don't have any buckets!:")
 	} else {
 		for _, bucket := range buckets {
-			s.Info("Name bucket", zap.String("value", *bucket.Name))
-			objects, err := s.s3adapter.ListObjects("DATA")
+			s.Info("Name bucket: ", zap.String("value", *bucket.Name))
+			//objects, err := s.s3adapter.ListObjects("DATA")
+			objects, err := s.s3adapter.ListObjects(*bucket.Name)
 			if err != nil {
-				s.Error("Failed to list objects")
-				//s.Error("Failed to list objects", zap.Error(err))
+				s.Error("Error to list objects: ", zap.Error(err))
 				return
 			}
 			for _, object := range objects {
-				s.Info("Name object", zap.String("value", *object.Key))
+				s.Info("Name object: ", zap.String("value", *object.Key))
 			}
 		}
+
+		//bucket, err := s.s3adapter.CreateBucket("cbaciliodca", "us-east-2")
+		bucket, err := s.s3adapter.CreateBucket("cbaciliodc", "us-east-1")
+		if err != nil {
+			s.Error("Error to create bucket: ", zap.String("error", err.Error()))
+			return
+		}
+		fmt.Println(bucket)
 	}
 }
