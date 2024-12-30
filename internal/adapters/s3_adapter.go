@@ -41,6 +41,7 @@ type IS3Adapter interface {
 	ListObjects(bucketName string) ([]types.Object, error)
 	ExistBucket(bucketName string) (bool, error)
 	CreateBucket(bucketName, region string) (bool, error)
+	ListBucketByRegion(bucketName string) (string, error)
 }
 
 func NewS3Adapter(log *zap.Logger, region, profile string) IS3Adapter {
@@ -79,6 +80,23 @@ func (a *S3Adapter) ListBuckets() ([]types.Bucket, error) {
 	}
 	a.Info("Successfully listed buckets: ", zap.Int("buckets", len(buckets.Buckets)))
 	return buckets.Buckets, err
+}
+
+func (a *S3Adapter) ListBucketByRegion(bucketName string) (string, error) {
+	a.Info("Listing buckets by region: ", zap.String("region", bucketName))
+	location, err := a.client.GetBucketLocation(context.Background(), &s3.GetBucketLocationInput{Bucket: &bucketName})
+	if err != nil {
+		return "", err
+	}
+
+	constraint := string(location.LocationConstraint)
+
+	if constraint == "" {
+		constraint = "us-east-1"
+	}
+
+	a.Info("Listed buckets by region: ", zap.String("bucket", bucketName), zap.String("region", constraint))
+	return constraint, nil
 }
 
 func (a *S3Adapter) ListObjects(bucketName string) ([]types.Object, error) {
@@ -127,49 +145,28 @@ func (a *S3Adapter) ExistBucket(bucketName string) (bool, error) {
 }
 
 func (a *S3Adapter) CreateBucket(bucketName, region string) (bool, error) {
+
 	a.Info("Creating bucket: ", zap.String("bucket", bucketName), zap.String("region", region))
-	bucket, err := a.client.CreateBucket(context.Background(), &s3.CreateBucketInput{
+
+	input := &s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
-		CreateBucketConfiguration: &types.CreateBucketConfiguration{
+	}
+
+	if region != "us-east-1" {
+		cnf := &types.CreateBucketConfiguration{
 			LocationConstraint: types.BucketLocationConstraint(region),
-		},
+		}
+		input.CreateBucketConfiguration = cnf
+	}
 
-		/*
-
-				// CreateBucket creates a bucket with the specified name in the specified Region.
-
-
-				if err != nil {
-					var owned *types.BucketAlreadyOwnedByYou
-					var exists *types.BucketAlreadyExists
-					if errors.As(err, &owned) {
-						log.Printf("You already own bucket %s.\n", name)
-						err = owned
-					} else if errors.As(err, &exists) {
-						log.Printf("Bucket %s already exists.\n", name)
-						err = exists
-					}
-				} else {
-					err = s3.NewBucketExistsWaiter(basics.S3Client).Wait(
-						ctx, &s3.HeadBucketInput{Bucket: aws.String(name)}, time.Minute)
-					if err != nil {
-						log.Printf("Failed attempt to wait for bucket %s to exist.\n", name)
-					}
-				}
-				return err
-			}
-
-
-		*/
-	})
-
-	fmt.Println(err)
+	bucket, err := a.client.CreateBucket(context.Background(), input)
 
 	if err != nil {
 		return false, a.ValidateError(err)
 	}
-	fmt.Println(*bucket.Location)
-	fmt.Println(bucket.ResultMetadata)
+	fmt.Println(bucket)
+
 	a.Info("Successfully created bucket: ", zap.String("bucket", bucketName))
+
 	return true, nil
 }

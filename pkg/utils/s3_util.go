@@ -33,6 +33,10 @@ func (e *AwsError) ValidateError(err error) error {
 	if errors.As(err, &ae) {
 		fmt.Println(ae.ErrorCode())
 		switch ae.ErrorCode() {
+		case "BucketAlreadyOwnedByYou":
+			return errors.New("AWS Bucket Already Owned")
+		case "BucketAlreadyExists":
+			return errors.New("AWS Bucket Already Exists")
 
 		case "SignatureDoesNotMatch":
 			return errors.New("AWS Signature Does Not Match")
