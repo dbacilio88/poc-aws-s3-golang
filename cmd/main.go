@@ -56,6 +56,6 @@ func main() {
 
 	s3Instance := adapters.NewS3Adapter(l, REGION, PROFILE)
 	storageInstance := services.NewStorageService(l, s3Instance)
-	storageInstance.ListBucketFromS3()
+	storageInstance.ListBucketFromS3(REGION)
 
 }

@@ -31,7 +31,7 @@ type StorageService struct {
 }
 
 type IStorageService interface {
-	ListBucketFromS3()
+	ListBucketFromS3(search string)
 }
 
 func NewStorageService(log *zap.Logger, s3adapter adapters.IS3Adapter) IStorageService {
@@ -41,8 +41,7 @@ func NewStorageService(log *zap.Logger, s3adapter adapters.IS3Adapter) IStorageS
 	}
 }
 
-func (s *StorageService) ListBucketFromS3() {
-
+func (s *StorageService) ListBucketFromS3(search string) {
 	s.Info("Initializing S3 service: ")
 	buckets, err := s.s3adapter.ListBuckets()
 
@@ -55,24 +54,33 @@ func (s *StorageService) ListBucketFromS3() {
 		s.Info("No buckets found or You don't have any buckets!:")
 	} else {
 		for _, bucket := range buckets {
-			s.Info("Name bucket: ", zap.String("value", *bucket.Name))
-			//objects, err := s.s3adapter.ListObjects("DATA")
-			objects, err := s.s3adapter.ListObjects(*bucket.Name)
+			s.Info("List buckets by region: ", zap.String("name", *bucket.Name))
+			region, err := s.s3adapter.ListBucketByRegion(*bucket.Name)
 			if err != nil {
-				s.Error("Error to list objects: ", zap.Error(err))
+				s.Error("Failed to list buckets by region: ", zap.String("error", err.Error()))
 				return
 			}
-			for _, object := range objects {
-				s.Info("Name object: ", zap.String("value", *object.Key))
+
+			if region == search {
+				s.Info("List objects by region: ", zap.String("name", *bucket.Name))
+				objects, err := s.s3adapter.ListObjects(*bucket.Name)
+				if err != nil {
+					s.Error("Error to list objects: ", zap.Error(err))
+					return
+				}
+				for _, object := range objects {
+					s.Info("Name object: ", zap.String("value", *object.Key))
+				}
 			}
 		}
-
-		//bucket, err := s.s3adapter.CreateBucket("cbaciliodca", "us-east-2")
-		bucket, err := s.s3adapter.CreateBucket("cbaciliodc", "us-east-1")
-		if err != nil {
-			s.Error("Error to create bucket: ", zap.String("error", err.Error()))
-			return
-		}
-		fmt.Println(bucket)
 	}
+
+	bucket, err := s.s3adapter.CreateBucket("christian-cb", "us-east-2")
+	//bucket, err := s.s3adapter.CreateBucket("data", "us-east-1")
+	if err != nil {
+		s.Error("Error to create bucket: ", zap.String("error", err.Error()))
+		return
+	}
+	fmt.Println(bucket)
+
 }
