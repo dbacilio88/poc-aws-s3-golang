@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/dbacilio88/poc-aws-s3-golang/config"
-	"github.com/dbacilio88/poc-aws-s3-golang/internal/adapters"
-	"github.com/dbacilio88/poc-aws-s3-golang/internal/services"
+	"github.com/dbacilio88/poc-aws-s3-golang/internal/server"
+	"github.com/dbacilio88/poc-aws-s3-golang/internal/server/routes"
 	"github.com/dbacilio88/poc-aws-s3-golang/pkg/logs"
 	"go.uber.org/zap"
 	"log"
@@ -54,8 +54,16 @@ func main() {
 		return
 	}
 
-	s3Instance := adapters.NewS3Adapter(l, REGION, PROFILE)
-	storageInstance := services.NewStorageService(l, s3Instance)
-	storageInstance.ListBucketFromS3(REGION)
+	//configuration http server:
+	srv := server.NewHttpConfig(l).
+		Port(config.YAML.Server.Port).
+		Name(routes.NameRouterGin).
+		NewHttpServer(routes.InstanceRouterGin)
 
+	// start instance server http
+	srv.Start()
+
+	//s3Instance := adapters.NewS3Adapter(l, REGION, PROFILE)
+	//storageInstance := services.NewStorageService(l, s3Instance)
+	//storageInstance.ListBucketFromS3(REGION)
 }

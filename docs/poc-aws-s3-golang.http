@@ -1,0 +1,8 @@
+### GET HEALTH
+GET http://localhost:3000/health
+###
+
+
+### GET BUCKTES
+GET http://localhost:3000/buckets
+###
