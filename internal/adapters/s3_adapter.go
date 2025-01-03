@@ -37,8 +37,8 @@ type S3Adapter struct {
 }
 
 type IS3Adapter interface {
-	ListBuckets() ([]types.Bucket, error)
-	ListObjects(bucketName string) ([]types.Object, error)
+	ListBuckets(ctx context.Context) ([]types.Bucket, error)
+	ListObjects(ctx context.Context, bucketName string) ([]types.Object, error)
 	ExistBucket(bucketName string) (bool, error)
 	CreateBucket(bucketName, region string) (bool, error)
 	ListBucketByRegion(bucketName string) (string, error)
@@ -72,9 +72,9 @@ func NewS3Adapter(log *zap.Logger, region, profile string) IS3Adapter {
 	}
 }
 
-func (a *S3Adapter) ListBuckets() ([]types.Bucket, error) {
+func (a *S3Adapter) ListBuckets(ctx context.Context) ([]types.Bucket, error) {
 	a.Info("Listing buckets from AWS: ")
-	buckets, err := a.client.ListBuckets(context.Background(), &s3.ListBucketsInput{})
+	buckets, err := a.client.ListBuckets(ctx, &s3.ListBucketsInput{})
 	if err != nil {
 		return nil, a.ValidateError(err)
 	}
@@ -99,8 +99,8 @@ func (a *S3Adapter) ListBucketByRegion(bucketName string) (string, error) {
 	return constraint, nil
 }
 
-func (a *S3Adapter) ListObjects(bucketName string) ([]types.Object, error) {
-	a.Info("Listing objects from AWS: ")
+func (a *S3Adapter) ListObjects(ctx context.Context, bucketName string) ([]types.Object, error) {
+	a.Info("Listing objects by bucket from AWS: ", zap.String("bucket", bucketName))
 	var err error
 	var objects []types.Object
 	output := &s3.ListObjectsV2Output{}
@@ -125,6 +125,11 @@ func (a *S3Adapter) ListObjects(bucketName string) ([]types.Object, error) {
 		objects = append(objects, output.Contents...)
 	}
 	a.Info("Successfully listed objects: ", zap.Int("objects", len(objects)))
+
+	if len(objects) == 0 {
+		return []types.Object{}, nil
+	}
+
 	return objects, nil
 }
 
