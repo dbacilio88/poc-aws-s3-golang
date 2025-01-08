@@ -7,5 +7,5 @@
 [![GitHub License](https://img.shields.io/github/license/dbacilio88/archetype-api-microservices)](https://github.com/dbacilio88/archetype-api-microservices/blob/master/LICENSE)
 
 
-# poc-aws-s3-golang
-poc-aws-s3-golang
+# poc-golang-examples
+poc-golang-examples
