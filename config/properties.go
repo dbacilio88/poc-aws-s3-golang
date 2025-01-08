@@ -117,6 +117,7 @@ func (r *Rabbitmq) GetRoutingKey() string {
 func LoadProperties() error {
 
 	path := os.Getenv("CONFIG_PATH")
+	fmt.Println("CONFIG_PATH:", path)
 
 	if path == "" {
 		return errors.New("la variable de entorno CONFIG_PATH no está definida")
