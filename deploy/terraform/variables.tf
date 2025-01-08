@@ -29,3 +29,11 @@ variable "user_sk" {
   nullable = false
   sensitive = true
 }
+
+variable "name_dynamodb" {
+type = string
+  default = ""
+  description = "Name database"
+  nullable = false
+  sensitive = true
+}
